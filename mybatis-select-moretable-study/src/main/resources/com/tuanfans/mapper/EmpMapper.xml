@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tuanfans.mapper.EmpMapper">
+    <sql id="empAllColumns">
+        empno,ename,job,mgr,hiredate,sal,comm,deptno
+    </sql>
+
+    <!-- 映射结果集 -->
+    <resultMap id="empResultMap" type="emp">
+        <!--
+        主键用id标签，非主键用result标签
+        <id column="empno" property="empno"/>
+        column属性：表中的列名
+        property属性：实体类属性名
+        -->
+        <result column="empno" property="empno"/>
+        <result column="ename" property="ename"/>
+        <result column="job" property="job"/>
+        <result column="mgr" property="mgr"/>
+        <result column="hiredate" property="hiredate"/>
+        <result column="sal" property="sal"/>
+        <result column="comm" property="comm"/>
+        <result column="deptno" property="deptno"/>
+    </resultMap>
+
+    <!--
+    <select id="findAll" resultType="emp">
+        select <include refid="empAllColumns"/> from emp;
+    </select>
+    -->
+    <select id="findAll" resultMap="empResultMap">
+        select <include refid="empAllColumns"/> from emp;
+    </select>
+
+    <!--映射结果集-->
+    <resultMap id="empJoinDept" type="emp">
+        <id column="empno" property="empno"/>
+        <result column="ename" property="ename"/>
+        <result column="job" property="job"/>
+        <result column="mgr" property="mgr"/>
+        <result column="hiredate" property="hiredate"/>
+        <result column="sal" property="sal"/>
+        <result column="comm" property="comm"/>
+        <result column="deptno" property="deptno"/>
+        <!--
+        association标签：处理一对一信息关联
+        property属性：实体类属性名
+        javaType属性：属性对应的实体类类型
+        -->
+        <!--嵌套结果-->
+        <association property="dept" javaType="dept">
+            <id column="deptno" property="deptno"/>
+            <result column="dname" property="dname"/>
+            <result column="loc" property="loc"/>
+        </association>
+
+        <!--嵌套查询-->
+        <!--<association
+                property="dept"
+                javaType="dept"
+                column="deptno"
+                select="com.tuanfans.mapper.DeptMapper.findDeptByDeptno"/>-->
+    </resultMap>
+
+
+    <select id="findEmpJoinDeptByEmpno" resultMap="empJoinDept">
+        select * from emp
+        left join dept
+        on emp.deptno = dept.deptno
+        where emp.empno = #{empno};
+    </select>
+
+    <resultMap id="empJoinDept2" type="emp">
+        <id column="empno" property="empno"/>
+        <result column="ename" property="ename"/>
+        <result column="job" property="job"/>
+        <result column="mgr" property="mgr"/>
+        <result column="hiredate" property="hiredate"/>
+        <result column="sal" property="sal"/>
+        <result column="comm" property="comm"/>
+        <result column="deptno" property="deptno"/>
+        <!--
+        association标签：处理一对一信息关联
+        property属性：实体类属性名
+        javaType属性：属性对应的实体类类型
+        -->
+
+        <!--嵌套查询-->
+        <association
+                property="dept"
+                javaType="dept"
+                column="deptno"
+                select="com.tuanfans.mapper.DeptMapper.findDeptByDeptno"/>
+    </resultMap>
+
+    <select id="findEmpJoinDeptByEmpno2" resultMap="empJoinDept2">
+        select * from emp where empno = #{empno};
+    </select>
+
+    <select id="findEmpByDeptnos" resultType="emp">
+        select * from emp
+        <where>
+            <if test="deptnos!=null and !deptnos.isEmpty()">
+                and deptno in
+                <foreach collection="deptnos" open="(" close=")" separator="," item="deptno">
+                    #{deptno}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="findEmpByDeptno" resultType="emp">
+        select * from emp where deptno = #{deptno};
+    </select>
+</mapper>

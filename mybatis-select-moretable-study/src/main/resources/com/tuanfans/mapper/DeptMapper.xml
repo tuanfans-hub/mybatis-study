@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tuanfans.mapper.DeptMapper">
+    <sql id="deptAllColumns">
+        deptno,dname,loc
+    </sql>
+
+    <select id="findDeptByDeptno" resultType="dept">
+        select <include refid="deptAllColumns"/> from dept where deptno = #{deptno};
+    </select>
+
+    <resultMap id="deptJoinEmpList" type="dept">
+        <id column="deptno" property="deptno"/>
+        <result column="dname" property="dname"/>
+        <result column="loc" property="loc"/>
+        <!--
+            collection标签：处理一对多信息关联
+            property属性：实体类属性名
+            ofType属性：实体类属性对应的实体类类型
+        -->
+        <!--嵌套结果-->
+        <collection property="emps" ofType="emp">
+            <id column="empno" property="empno"/>
+            <result column="ename" property="ename"/>
+            <result column="job" property="job"/>
+            <result column="mgr" property="mgr"/>
+            <result column="hiredate" property="hiredate"/>
+            <result column="sal" property="sal"/>
+            <result column="comm" property="comm"/>
+            <result column="deptno" property="deptno"/>
+        </collection>
+
+        <!--嵌套查询-->
+        <!--<collection
+                property="emps"
+                javaType="list"
+                column="deptno"
+                fetchType="eager"
+                select="com.tuanfans.mapper.EmpMapper.findEmpByDeptno"/>-->
+
+    </resultMap>
+
+    <select id="findDeptJoinEmpByDeptno" resultMap="deptJoinEmpList">
+        select * from emp
+        left join dept
+        on emp.deptno = dept.deptno
+        <where>
+            <if test="deptnos!=null and !deptnos.isEmpty()">
+                and dept.deptno in
+                <foreach collection="deptnos" open="(" close=")" separator="," item="deptno">
+                    #{deptno}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="deptJoinEmpList2" type="dept">
+        <id column="deptno" property="deptno"/>
+        <result column="dname" property="dname"/>
+        <result column="loc" property="loc"/>
+        <!--
+            collection标签：处理一对多信息关联
+            property属性：实体类属性名
+            ofType属性：实体类属性对应的实体类类型
+        -->
+
+        <!--嵌套查询-->
+        <!--
+        fetchType属性：积极加载/懒加载
+        select属性：指定嵌套查询
+        column属性：指定外键列名（执行查询语句的条件属性名，即查询方法的参数对应的列名）
+        jdbcType属性：指定column值的类型
+        -->
+        <collection
+                property="emps"
+                javaType="list"
+                column="deptno"
+                fetchType="lazy"
+                select="com.tuanfans.mapper.EmpMapper.findEmpByDeptno"/>
+
+    </resultMap>
+
+    <select id="findDeptJoinEmpByDeptno2" resultMap="deptJoinEmpList2">
+        select * from dept
+        <where>
+            <if test="deptnos!=null and !deptnos.isEmpty()">
+                and deptno in
+                <foreach collection="deptnos" open="(" close=")" separator="," item="deptno">
+                    #{deptno}
+                </foreach>
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tuanfans.mapper.ProjectMapper">
+
+    <resultMap id="proJoinEmps" type="project">
+        <id column="pid" property="pid"/>
+        <result column="pname" property="pname"/>
+        <result column="money" property="money"/>
+
+        <!-- 一对多 -->
+        <collection property="proAndEmp" javaType="list" ofType="proAndEmp">
+            <id column="empno" property="empno"/>
+            <id column="pid" property="pid"/>
+            <!-- 一对一 -->
+            <association property="emp" javaType="emp">
+                <id column="empno" property="empno"/>
+                <result column="ename" property="ename"/>
+                <result column="job" property="job"/>
+                <result column="mgr" property="mgr"/>
+                <result column="hiredate" property="hiredate"/>
+                <result column="sal" property="sal"/>
+                <result column="comm" property="comm"/>
+                <result column="deptno" property="deptno"/>
+            </association>
+        </collection>
+    </resultMap>
+
+    <select id="findProJoinEmpsByPid" resultMap="proJoinEmps">
+        select * from
+        project p
+        left join proandemp pe
+        on p.pid = pe.pid
+        left join emp e
+        on pe.empno = e.empno
+        <where>
+            <if test="pids!=null and !pids.isEmpty()">
+                and p.pid in
+                <foreach collection="pids" open="(" close=")" separator="," item="pid">
+                    #{pid}
+                </foreach>
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tuanfans.mapper.EmpMapper">
+    <!--
+    1.接口名称和Mapper映射文件名必须保持一致（不包含拓展名）
+    2.Mapper映射文件的namespace必须和接口的全限定名保持一致
+    3.sql语句的id必须和接口的方法名保持一致
+    4.Mapper映射文件和接口编译后应在同一个包下
+    -->
+
+    <!--定义SQL片段: sql标签-->
+    <!--如果需要引用sql标签：include标签-->
+    <sql id="empAllColumns">
+        empno,ename,job,mgr,hiredate,sal,comm,deptno
+    </sql>
+
+    <select id="findAll" resultType="emp">
+        select <include refid="empAllColumns"/> from emp;
+    </select>
+
+    <!--
+    resultType：指定查询结果集的封装类型
+    parameterType：指定查询参数的封装类型,可省略不写
+    -->
+    <select id="findEmpById" resultType="emp" parameterType="integer">
+        select <include refid="empAllColumns"/> from emp where empno=#{empno};
+    </select>
+
+    <!--
+    当存在多个参数时，mybatis底层会把参数封装到Map集合中
+    默认情况下，MyBatis 使用 arg0, arg1 或 param1, param2 来引用参数。
+    如果想使用自定义的参数名称，可以在接口的方法参数中添加@Param注解
+    @Param注解的value属性指定参数名称之后，arg0, arg1等参数名称就不生效了,但是param1, param2等参数名称仍旧生效
+    -->
+    <select id="findEmpByDeptAndSal" resultType="emp">
+        select <include refid="empAllColumns"/> from emp where deptno=#{deptno} and sal>#{sal};
+    </select>
+
+    <select id="findEmpByDeptAndSal2" resultType="emp" parameterType="map">
+        select <include refid="empAllColumns"/> from emp where deptno=#{deptno} and sal>#{sal};
+    </select>
+
+    <!-- {}中写的是参数类对应的属性名 -->
+    <select id="findEmpByDeptAndSal3" resultType="emp" parameterType="emp">
+        select <include refid="empAllColumns"/> from emp where deptno=#{deptno} and sal>#{sal};
+    </select>
+
+    <select id="findEmpByDeptAndSal4" resultType="emp">
+        select <include refid="empAllColumns"/> from emp where deptno=#{emp1.deptno} and sal>#{emp2.sal};
+    </select>
+
+    <!--
+    '%${}%'可以通过concat('%',#{},'%')函数进行拼接
+    '%#{}%'该写法是不允许的
+    -->
+    <select id="findEmpByName" resultType="emp">
+<!--        select * from emp where ename like '%${ename}%';-->
+        select <include refid="empAllColumns"/> from emp where ename like concat('%',#{ename},'%');
+    </select>
+
+    <!--动态SQL: if标签
+    where 语句后面的true的作用：为了与where语句后面的and关键字进行拼接
+    建议：
+    1.如果where语句后面使用and语句拼接，那么where语句后面使用true
+    2.如果where语句后面使用or语句拼接，那么where语句后面使用false
+    如果实体类的属性类型为String,除了需要判断是否为null，还需要判断是否为空串
+    -->
+    <!--缺陷：即使业务上允许空字符串作为有效值，也会被过滤掉-->
+    <!--
+    <select id="findEmpByCondition" resultType="emp">
+        select * from emp where true
+        <if test="empno!=null">
+            and empno=#{empno}
+        </if>
+        <if test="ename!=null and ename!=''">
+            and ename=#{ename}
+        </if>
+        <if test="job!=null and job!=''">
+            and job=#{job}
+        </if>
+        <if test="mgr!=null">
+            and mgr=#{mgr}
+        </if>
+        <if test="hiredate!=null">
+            and hiredate=#{hiredate}
+        </if>
+        <if test="sal!=null">
+            and sal=#{sal}
+        </if>
+        <if test="comm!=null">
+            and comm=#{comm}
+        </if>
+        <if test="deptno!=null">
+            and deptno=#{deptno}
+        </if>
+    </select>
+    -->
+
+    <!--优化：-->
+    <!--动态SQL: where标签-->
+    <!--缺陷：即使业务上允许空字符串作为有效值，也会被过滤掉-->
+    <select id="findEmpByCondition" resultType="emp">
+        select <include refid="empAllColumns"/> from emp
+        <where>
+            <if test="empno!=null">
+                and empno=#{empno}
+            </if>
+            <if test="ename!=null and ename!=''">
+                and ename=#{ename}
+            </if>
+            <if test="job!=null and job!=''">
+                and job=#{job}
+            </if>
+            <if test="mgr!=null">
+                and mgr=#{mgr}
+            </if>
+            <if test="hiredate!=null">
+                and hiredate=#{hiredate}
+            </if>
+            <if test="sal!=null">
+                and sal=#{sal}
+            </if>
+            <if test="comm!=null">
+                and comm=#{comm}
+            </if>
+            <if test="deptno!=null">
+                and deptno=#{deptno}
+            </if>
+        </where>
+    </select>
+
+    <!--动态SQL: set标签-->
+    <update id="updateEmpByCondition">
+        update emp
+        <set>
+            <if test="empno!=null">
+                empno=#{empno},
+            </if>
+            <if test="ename!=null and ename!=''">
+                ename=#{ename},
+            </if>
+            <if test="job!=null and job!=''">
+                job=#{job},
+            </if>
+            <if test="mgr!=null">
+                mgr=#{mgr},
+            </if>
+            <if test="hiredate!=null">
+                hiredate=#{hiredate},
+            </if>
+            <if test="sal!=null">
+                sal=#{sal},
+            </if>
+            <if test="comm!=null">
+                comm=#{comm},
+            </if>
+            <if test="deptno!=null">
+                deptno=#{deptno}
+            </if>
+        </set>
+        where empno=#{empno};
+    </update>
+
+    <!--动态SQL: foreach标签-->
+    <!--
+    collection：指定集合名称,可通过@Param注解指定
+    如果没有通过@Param注解指定：
+        对于List集合：mybatis底层提供了arg0、collection、list三个默认名称；
+        对于数组：mybatis底层提供了arg0、array两个默认名称；
+        对于Map集合：mybatis底层提供了arg0、map两个默认名称；
+    如果通过@Param注解指定了名称：
+        除了指定的名称外，mybatis底层还提供了param1默认名称；
+    item：指定集合中的每一个元素
+    index：指定集合中的索引
+    open：指定集合的开始符号
+    close：指定集合的结束符号
+    separator：指定集合中每一个元素之间的分隔符
+    -->
+    <select id="findEmpByMoreDept" resultType="Emp">
+        select <include refid="empAllColumns"/> from emp
+        <where>
+            <!--如果deptnos不为null且有元素，就注入以下sql语句-->
+            <if test="deptnos!=null and !deptnos.isEmpty">
+                and deptno in
+                <foreach collection="deptnos" open="(" separator="," close=")" item="deptno">
+                    #{deptno}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>

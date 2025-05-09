@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!-- 配置全局属性 -->
+    <properties resource="jdbc.properties"/>
+
+    <settings>
+        <!-- 配置日志 -->
+        <setting name="logImpl" value="LOG4J2"/>
+    </settings>
+
+    <!-- 配置别名:降低冗余的全限定类名书写 -->
+    <typeAliases>
+        <!-- 配置别名 -->
+    <!--<typeAlias alias="dept" type="com.tuanfans.pojo.Dept"/>-->
+        <!--  指定包名：该包下的所有类均起别名=类名首字母小写 -->
+        <package name="com.tuanfans.pojo"/>
+    </typeAliases>
+
+    <!-- 配置环境 -->
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${mysql.driver}"/>
+                <property name="url" value="${mysql.url}"/>
+                <property name="username" value="${mysql.username}"/>
+                <property name="password" value="${mysql.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!-- 配置映射文件 -->
+    <mappers>
+<!--        <mapper resource="com/tuanfans/mapper/EmpMapper.xml"/>-->
+        <!-- 通过类的全路径去找Mapper映射文件 -->
+<!--        <mapper class="com.tuanfans.mapper.EmpMapper"/>-->
+<!--        <mapper class="com.tuanfans.mapper.DeptMapper"/>-->
+        <package name="com.tuanfans.mapper"/>
+    </mappers>
+</configuration>

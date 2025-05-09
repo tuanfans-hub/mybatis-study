@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="EmpMapper">
+
+    <!--
+    id:方法名
+    resultType:返回值类型
+    parameterType:参数类型，可以省略不写；mybatis会根据参数类型进行匹配
+
+    在sql语句中，#{}或${}表示占位符，表示参数的值
+    ${}表示拼接sql串，底层是使用Statement进行操作的
+    #{}表示占位符，底层是使用PreparedStatement进行操作的
+    -->
+    <!-- 根据工号查询员工信息（返回单个对象） -->
+    <select id="findEmpByEmpno" resultType="emp" parameterType="int">
+        select * from emp where empno=#{empno};
+    </select>
+
+    <!-- 查询全部员工信息（返回多个对象的List集合） -->
+    <select id="findAll" resultType="emp">
+        select * from emp;
+    </select>
+
+    <!-- 查询全部员工信息（返回多个对象的Map集合） -->
+    <!-- 查询出来的数据的某一列作为键（该列字段具备唯一性），查询出来的数据的一行作为值
+         Map<empno,Emp>
+    -->
+    <select id="findEmpMap" resultType="map">
+        select * from emp;
+    </select>
+
+    <!-- 查询某部门且工资在xxx以上的员工信息 -->
+    <!-- 以Map集合为参数 -->
+    <!-- 参数有多个时，可以将参数封装到Map集合中，把Map集合作为参数传递给查询方法 -->
+    <!-- sql语句中的参数必须与Map集合中的key值保持一致，否则会报错或查询失败 -->
+    <select id="findEmpByDeptAndSal" resultType="emp" parameterType="map">
+        select * from emp where deptno=#{deptno} and sal>#{sal};
+    </select>
+
+    <!-- 查询某部门且工资在xxx以上的员工信息 -->
+    <!-- 以自定义类型对象为参数 -->
+    <!-- 将参数封装到自定义类型对象中，再把自定义类型对象作为参数传递给查询方法 -->
+    <!-- sql语句中的参数必须是自定义类型中的属性名保持一致 -->
+    <select id="findEmpByDeptAndSal2" resultType="emp" parameterType="emp">
+        select * from emp where deptno=#{deptno} and sal>#{sal};
+    </select>
+
+    <!-- 增删改的返回值都是int类型:没有resultType属性 -->
+    <!-- 添加员工信息 -->
+    <insert id="insertEmp" parameterType="emp">
+        insert into emp values(#{empno},#{ename},#{job},#{mgr},#{hiredate},#{sal},#{comm},#{deptno});
+    </insert>
+
+    <!-- 根据工号修改员工信息 -->
+    <update id="updateEmp" parameterType="emp">
+        update emp set ename=#{ename},job=#{job},mgr=#{mgr},hiredate=#{hiredate},sal=#{sal},comm=#{comm},deptno=#{deptno} where empno=#{empno};
+    </update>
+
+    <!--  根据工号删除员工信息 -->
+    <delete id="deleteEmp" parameterType="integer">
+        delete from emp where empno>#{empno};
+    </delete>
+
+</mapper>
